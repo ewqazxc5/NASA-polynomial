@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import CubicSpline
 import csv
 
+# R - universal gas constant, 8.314510 J/(mol-K)
 R=8.314510
 data=pd.read_csv('table6.dat',sep='\t',header=None,low_memory=False)
 row_number=len(data[0])
@@ -15,6 +16,7 @@ x=[]
 num=len(T)
 for i in range(1,num):
     x+=[float(T[i])]
+# set x axis temperature
 x=np.array(x)
 
 
@@ -29,7 +31,9 @@ def get_Cp_parameter(row,IA,IB,start_number,save=1):  # start_number=2 or 1
     for i in range(start_number,num):
         y+=[multiplier*float(data_row[i])]
 
+    #cubic spline interpolation
     cs = CubicSpline(x, y)
+    #set x axis after using cubic spline method as xs
     xs = x
     fig = plt.figure(figsize=(15,6))
 
@@ -39,9 +43,8 @@ def get_Cp_parameter(row,IA,IB,start_number,save=1):  # start_number=2 or 1
     
 
     ax1.plot(x, y, 'o', label='data')
-
     ax1.plot(xs, cs(xs), label="Q-cubic_spline")
-
+    #First two moments of partition function
     Q1=xs*cs(xs, 1)
     Q2=xs*xs*cs(xs, 2)+2*xs*cs(xs,1)
     ax2.plot(xs, Q1, label="Q'")
@@ -54,7 +57,7 @@ def get_Cp_parameter(row,IA,IB,start_number,save=1):  # start_number=2 or 1
     ax2.legend(loc='upper left', ncol=2)
     ax2.set_title('derivative')
 
-
+    #calculated specific heat
     Cp=R*(Q2/cs(xs)-(Q1/cs(xs))**2)+5*R/2
 
 
@@ -65,8 +68,9 @@ def get_Cp_parameter(row,IA,IB,start_number,save=1):  # start_number=2 or 1
     
     
     CpT2_R=Cp*x*x/R
-
+    #choose temperature in interval 298.15-6000K
     x1=x[28:32]
+    #least square method
     z1=np.polyfit(x1,CpT2_R[28:32],6)
     p1=np.poly1d(z1)
     X1=xs = np.arange(300,1000,1)
@@ -91,11 +95,11 @@ def get_Cp_parameter(row,IA,IB,start_number,save=1):  # start_number=2 or 1
         y_fitted=np.concatenate((y_fitted,y_fit_part))
 
     
-
+    #get fitted y using least square coefficients
     y_fit=np.concatenate((y_fit_part1,y_fit_part2))
-
+    #calculate residuals
     resd=y_fit-y_fitted
-
+    #set another scale in the same graph
     ax32=ax3.twinx()
    
     ax32.plot(XX,resd, label="residual",color='k')
@@ -107,7 +111,7 @@ def get_Cp_parameter(row,IA,IB,start_number,save=1):  # start_number=2 or 1
     ax3.set_ylabel(name+' Cp-T')
     ax3.legend(loc='upper left')
     ax3.set_xlim(300,6000)
-
+    #choose save data or show data
     if save==1:
         with open('Cp0.csv','a',newline='') as w:
             writer=csv.writer(w,delimiter=',')
