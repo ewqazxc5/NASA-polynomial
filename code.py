@@ -21,7 +21,12 @@ x=np.array(x)
 
 
 def get_Cp_parameter(row,IA,IB,start_number,save=1):  # start_number=2 or 1
-
+    if start_number!=1 and start_number!=2:
+        raise ValueError('start_number could only be 1 or 2')
+    if row<4 or row>294:
+        raise ValueError('row should be in interval 4 to 294')
+    if type(row)!=int:
+        raise TypeError('row should be integer')
     data_row=data[0][row].split('   ')
     name=data_row[(start_number-1)].lstrip()
 
